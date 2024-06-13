@@ -1,22 +1,18 @@
- # This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
 name: ci-test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-
   test:
     name: Test
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres16
+        image: postgres:16
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret
@@ -26,18 +22,27 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 5432:5432
 
     steps:
-    - name: Checkout code into go module directory
-      uses: actions/checkout@v4
+      - name: Checkout code into go module directory
+        uses: actions/checkout@v4
 
-    - name: Run migrations
-      uses: make migrateup
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.22.3"
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.22.3'
+      - name: Install migrate CLI
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz -o migrate.tar.gz
+          tar -xzf migrate.tar.gz
+          sudo mv migrate /usr/local/bin/migrate
+          rm migrate.tar.gz
 
-    - name: Test
-      run: make test
+      - name: Run migrations
+        run: migrate -path db/migration -database "postgresql://root:secret@localhost:5432/gringotts_wizarding_bank?sslmode=disable" -verbose up
+
+      - name: Test
+        run: make test
