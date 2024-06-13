@@ -43,7 +43,7 @@ jobs:
           rm migrate.tar.gz
 
       - name: Run migrations
-        run: make migrateup
+        run: migrate -path db/migration -database "postgresql://root:secret@localhost:5432/gringotts_wizarding_bank?sslmode=disable" -verbose up
 
       - name: Test
         run: make test
