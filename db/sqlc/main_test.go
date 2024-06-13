@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	dbSource = "postgresql://root:freerunning@localhost:5432/gringotts_wizarding_bank?sslmode=disable"
+	dbSource = "postgresql://root:secret@localhost:5432/gringotts_wizarding_bank?sslmode=disable"
 )
 
 var testQueries *Queries
