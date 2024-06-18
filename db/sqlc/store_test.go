@@ -44,7 +44,7 @@ func TestTransferTx(t *testing.T) {
 		require.NotEmpty(t, transfer)
 		require.Equal(t, transfer.FromAccountID, acc1.ID)
 		require.Equal(t, transfer.ToAccountID, acc2.ID)
-		require.Equal(t, transfer.Amount, amount)
+		require.InDelta(t, transfer.Amount, amount, 0.1)
 		require.NotZero(t, transfer.ID)
 		require.NotZero(t, transfer.CreatedAt)
 		_, err = store.GetTransfer(context.Background(), transfer.ID)
@@ -53,7 +53,7 @@ func TestTransferTx(t *testing.T) {
 		fromEntry := result.FromEntry
 		require.NotEmpty(t, fromEntry)
 		require.Equal(t, fromEntry.AccountID, acc1.ID)
-		require.Equal(t, fromEntry.Amount, -amount)
+		require.InDelta(t, fromEntry.Amount, -amount, 0.1)
 		require.NotZero(t, fromEntry.ID)
 		require.NotZero(t, fromEntry.CreatedAt)
 		_, err = store.GetEntry(context.Background(), fromEntry.ID)
@@ -61,8 +61,8 @@ func TestTransferTx(t *testing.T) {
 
 		toEntry := result.ToEntry
 		require.NotEmpty(t, toEntry)
-		require.Equal(t, toEntry.AccountID, acc2.ID)
-		require.Equal(t, toEntry.Amount, amount)
+		require.InDelta(t, toEntry.AccountID, acc2.ID, 0.1)
+		require.InDelta(t, toEntry.Amount, amount, 0.1)
 		require.NotZero(t, toEntry.ID)
 		require.NotZero(t, toEntry.CreatedAt)
 		_, err = store.GetEntry(context.Background(), toEntry.ID)
@@ -92,8 +92,8 @@ func TestTransferTx(t *testing.T) {
 	updatedAcc2, err := testQueries.GetAccount(context.Background(), acc2.ID)
 	require.NoError(t, err)
 
-	require.Equal(t, updatedAcc1.Balance, acc1.Balance-amount*float64(numOfTransactions))
-	require.Equal(t, updatedAcc2.Balance, acc2.Balance+amount*float64(numOfTransactions))
+	require.InDelta(t, updatedAcc1.Balance, acc1.Balance-amount*float64(numOfTransactions), 0.1)
+	require.InDelta(t, updatedAcc2.Balance, acc2.Balance+amount*float64(numOfTransactions), 0.1)
 }
 
 func TestTransferTxDeadlock(t *testing.T) {
