@@ -43,7 +43,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 	var req getAccountRequest
 	err := ctx.ShouldBindUri(&req)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 

@@ -8,19 +8,20 @@ import (
 	"testing"
 
 	// "github.com/jackc/pgx/v5/pgxpool"
+	"github.com/danarcheronline/gringotts_wizarding_bank/db/util"
 	_ "github.com/lib/pq"
-)
-
-const (
-	dbSource = "postgresql://root:secret@localhost:5432/gringotts_wizarding_bank?sslmode=disable"
 )
 
 var testQueries *Queries
 var testDB *sql.DB
 
 func TestMain(m *testing.M) {
-	var err error
-	testDB, err = sql.Open("postgres", dbSource)
+	// var err error
+	config, err := util.LoadConfig("../..")
+	if err != nil {
+		log.Fatal("Cannot load config.", err)
+	}
+	testDB, err = sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("Cannot connect to database.", err)
 	}
