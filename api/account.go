@@ -6,9 +6,11 @@ import (
 
 	db "github.com/danarcheronline/gringotts_wizarding_bank/db/sqlc"
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
 
 type createAccountRequest struct {
+	UserId   int64  `json:"user_id" binding:"required,min=1"`
 	Owner    string `json:"owner" binding:"required"`
 	Currency string `json:"currency" binding:"required,currency"`
 }
@@ -24,10 +26,18 @@ func (serve *Server) createAccount(ctx *gin.Context) {
 		Owner:    req.Owner,
 		Balance:  0,
 		Currency: req.Currency,
+		UserID:   req.UserId,
 	}
 
 	acc, err := serve.store.CreateAccount(ctx, arg)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+				return
+			}
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}

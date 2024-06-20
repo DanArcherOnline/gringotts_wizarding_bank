@@ -2,11 +2,13 @@
 INSERT INTO accounts (
   owner, 
   balance,
-  currency
+  currency,
+  user_id
 ) VALUES (
   $1, 
   $2, 
-  $3
+  $3,
+  $4
 )
 RETURNING *;
 
